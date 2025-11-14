@@ -9,18 +9,6 @@ set -e
 # TODO upgrade only if needed (currently will happily reinstall same version)
 # TODO automatic opam update?
 
-SWITCH_NAME="switch"
-
-DATA_DIR="${XDG_DATA_HOME:-$HOME}/opamx"
-mkdir -p "$DATA_DIR"
-export OPAMROOT="${XDG_DATA_HOME:-$HOME/.local/share}/opamroot"
-
-if [ ! -d "$OPAMROOT" ]; then
-  opam init --bare --no-setup
-  opam switch create --empty "$SWITCH_NAME"
-fi
-mkdir -p "$DATA_DIR/install"
-
 help() {
   echo "Installer for ocaml programs via opam"
   echo
@@ -36,6 +24,18 @@ help() {
 }
 
 [ $# -gt 0 ] || help
+
+SWITCH_NAME="switch"
+
+DATA_DIR="${XDG_DATA_HOME:-$HOME}/opamx"
+mkdir -p "$DATA_DIR"
+export OPAMROOT="$DATA_DIR/opamroot"
+
+if [ ! -d "$OPAMROOT" ]; then
+  opam init --bare --no-setup
+  opam switch create --empty "$SWITCH_NAME"
+fi
+mkdir -p "$DATA_DIR/install"
 
 cmd="$1"
 shift
