@@ -80,8 +80,8 @@ case "$cmd" in
   program="$1"
   shift
   if [ ! -x "$DATA_DIR/bin/$program" ]; then
-    echo "Error: program '$program' not found in $DATA_DIR/bin" >&2
-    exit 1
+    echo "Program '$program' not found, attempting to install..." >&2
+    "$0" install "$program"
   fi
   exec "$DATA_DIR/bin/$program" "$@"
   ;;
