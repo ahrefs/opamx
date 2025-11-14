@@ -20,6 +20,7 @@ help() {
   echo "  opamx where              # location where binaries are installed"
   echo "  opamx list               # list installed packages"
   echo "  opamx search ...         # search opam repository"
+  echo "  opamx run {program} ...  # run an installed program with arguments"
   exit 0
 }
 
@@ -70,6 +71,19 @@ case "$cmd" in
   ;;
 "where")
   printf "%s\n" "$DATA_DIR/bin"
+  ;;
+"run")
+  if [ $# -eq 0 ]; then
+    echo "Error: no program specified" >&2
+    exit 1
+  fi
+  program="$1"
+  shift
+  if [ ! -x "$DATA_DIR/bin/$program" ]; then
+    echo "Error: program '$program' not found in $DATA_DIR/bin" >&2
+    exit 1
+  fi
+  exec "$DATA_DIR/bin/$program" "$@"
   ;;
 *)
   help
