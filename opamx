@@ -9,13 +9,17 @@ set -e
 # TODO upgrade only if needed (currently will happily reinstall same version)
 # TODO automatic opam update?
 
-export OPAMROOT=~/.opamx
+SWITCH_NAME="switch"
+
+DATA_DIR="${XDG_DATA_HOME:-$HOME}/opamx"
+mkdir -p "$DATA_DIR"
+export OPAMROOT="${XDG_DATA_HOME:-$HOME/.local/share}/opamroot"
 
 if [ ! -d "$OPAMROOT" ]; then
   opam init --bare --no-setup
-  opam switch create --empty switch
+  opam switch create --empty "$SWITCH_NAME"
 fi
-mkdir -p "$OPAMROOT/install"
+mkdir -p "$DATA_DIR/install"
 
 help() {
   echo "Installer for ocaml programs via opam"
@@ -42,21 +46,21 @@ case "$cmd" in
     opamx install $(opamx list)
   else
     # remove previously installed roots so that install will try to do less work
-    opam remove $(opam list --roots -s) >> "$OPAMROOT/.log"
-    opam install -y --destdir="$OPAMROOT" "$@"
+    opam remove $(opam list --roots -s) >> "$DATA_DIR/.log"
+    opam install -y --destdir="$DATA_DIR" "$@"
     for i in "$@"; do
-      cp "$OPAMROOT/switch/.opam-switch/install/$i.install" "$OPAMROOT/install/"
+      cp "$OPAMROOT/$SWITCH_NAME/.opam-switch/install/$i.install" "$DATA_DIR/install/"
     done
   fi
   ;;
 "remove")
   for i in "$@"; do
-    opam-installer --prefix "$OPAMROOT" --remove "$OPAMROOT/install/$i.install" || true
-    rm -f "$OPAMROOT/install/$i.install"
+    opam-installer --prefix "$DATA_DIR" --remove "$DATA_DIR/install/$i.install" || true
+    rm -f "$DATA_DIR/install/$i.install"
   done
   ;;
 "list")
-  ls -1 "$OPAMROOT/install" | sed 's/\.install$//'
+  ls -1 "$DATA_DIR/install" | sed 's/\.install$//'
   ;;
 "update")
   opam update
@@ -65,7 +69,7 @@ case "$cmd" in
   opam search --no-switch "$@"
   ;;
 "where")
-  printf "%s\n" "$OPAMROOT/bin"
+  printf "%s\n" "$DATA_DIR/bin"
   ;;
 *)
   help
